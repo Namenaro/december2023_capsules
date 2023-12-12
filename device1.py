@@ -7,27 +7,34 @@ import matplotlib.pyplot as plt
 from statistics import mean
 
 
-def experiment(inertia):
+def experiment(inertia, log):
+
     signal = get_signal_snippet(lead_name='i', start_coord=340, end_coord=435)
     device = Device(signal=signal, k=-6, inertia=inertia)
 
-    As = []
+    An = []
     for x in range(44, len(signal) - inertia):
         a = device.A_meank(x)
-        As.append(a)
+        An.append(a)
 
     fig, ax = plt.subplots()
     # draw_ECG(ax, signal)
     # ax.plot(As, 'red')
-    ax.hist(As)
+    ax.hist(An)
 
-    As = []
+    Ap = []
     for x in range(11, 43 - inertia):
         a = device.A_meank(x)
-        As.append(a)
-    ax.hist(As, label='positive')
+        Ap.append(a)
+    ax.hist(Ap, label='positive')
     ax.legend()
-    return fig
+
+
+    normer = ErProbNormer(Ap=Ap, An=An)
+    r = normer.get()
+    log.add_text("Инерция = " + str(inertia) + ", r = " + format(r, '.2f') +  " :")
+    log.add_fig(fig)
+
 
 class Device:
     def __init__(self, signal, k, inertia):
@@ -54,14 +61,43 @@ class Device:
         return ks
 
 
+class ErProbNormer:
+    def __init__(self, Ap, An):
+        self.Ap = Ap
+        self.An = An
+        A = self.Ap + self.An
+        self.distr = Distr(A)
+
+    def get_positive(self):
+        pp = []
+        for er in self.Ap:
+            p_of_so_good = 0.5 - self.distr.get_p_of_event(0, er)
+            pp.append(p_of_so_good)
+
+        p_positive = sum(pp)
+        return p_positive
+
+    def get_negative(self):
+        pp = []
+        for er in self.An:
+            p_of_so_good = 0.5 - self.distr.get_p_of_event(0, er)
+            pp.append(-p_of_so_good)
+
+        p = sum(pp)
+        return p
+
+    def get(self):
+        pos = self.get_positive()
+        neg = self.get_negative()
+        r = pos + neg
+        return r
 
 
 if __name__ == '__main__':
     log = HtmlLogger("D1_LOG")
-    for inertia in range(2,16,4):
-        fig = experiment(inertia)
-        log.add_text("Инерция = " + str(inertia) + " :")
-        log.add_fig(fig)
+    for inertia in range(2, 16, 4):
+        experiment(inertia, log)
+
 
 
 
