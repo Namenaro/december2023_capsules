@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from statistics import mean
 
 
-def experiment(inertia, log):
+def experiment_FIX_ALL_EXEPT_INERTIA(inertia, log):
 
     signal = get_signal_snippet(lead_name='i', start_coord=340, end_coord=435)
     device = Device(signal=signal, k=-6, inertia=inertia)
@@ -75,7 +75,8 @@ class ErProbNormer:
             pp.append(p_of_so_good)
 
         p_positive = sum(pp)
-        return p_positive
+        normer = 0.5 * len(self.Ap)
+        return p_positive/normer
 
     def get_negative(self):
         pp = []
@@ -84,7 +85,8 @@ class ErProbNormer:
             pp.append(-p_of_so_good)
 
         p = sum(pp)
-        return p
+        normer = 0.5 * len(self.An)
+        return p/normer
 
     def get(self):
         pos = self.get_positive()
@@ -94,9 +96,9 @@ class ErProbNormer:
 
 
 if __name__ == '__main__':
-    log = HtmlLogger("D1_LOG")
-    for inertia in range(2, 16, 4):
-        experiment(inertia, log)
+    log = HtmlLogger("D1_LOG_INERTIA_EFFECT")
+    for inertia in range(2, 16, 2):
+        experiment_FIX_ALL_EXEPT_INERTIA(inertia, log)
 
 
 
