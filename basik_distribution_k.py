@@ -36,7 +36,7 @@ class KDistr:
             ks.append(k)
         return ks
 
-class Samples:
+class SamplesK:
     def __init__(self, signal, inertia):
         self.all = KDistr(signal[11:-1], inertia).get_sample()
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     log.add_text("Гистограммы реальных К-интерционного (по всему сигналу, в позитивном регионе, в негативном)")
 
     for inertia in range(2, 16, 2):
-        samples_obj = Samples(signal, inertia)
+        samples_obj = SamplesK(signal, inertia)
         all, poss, negs = samples_obj.get_all_pos_neg()
         fig, ax = plt.subplots()
         ax.hist(all, color='gray', alpha=0.3)
